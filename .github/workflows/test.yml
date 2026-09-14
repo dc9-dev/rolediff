@@ -1,0 +1,46 @@
+name: Go, Rust and parity checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: off
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.23.x", "stable"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+      - run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race -cover ./...
+  rust-and-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - run: rustup toolchain install 1.85.1 --profile minimal --component rustfmt --component clippy
+      - run: cargo fmt --check
+        working-directory: rust
+      - run: cargo test --locked
+        working-directory: rust
+      - run: cargo clippy --locked --all-targets -- -D warnings
+        working-directory: rust
+      - run: cargo build --locked
+        working-directory: rust
+      - run: go build -o bin/rolediff ./cmd/rolediff
+      - run: python3 scripts/test_parity.py

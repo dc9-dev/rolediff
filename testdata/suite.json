@@ -1,0 +1,31 @@
+{
+  "base_url": "http://127.0.0.1:18080",
+  "identities": [
+    {"name": "alice", "bearer_env": "ROLEDIFF_ALICE_TOKEN"},
+    {"name": "bob", "bearer_env": "ROLEDIFF_BOB_TOKEN"},
+    {"name": "admin", "bearer_env": "ROLEDIFF_ADMIN_TOKEN"},
+    {"name": "anonymous"}
+  ],
+  "cases": [
+    {
+      "name": "alice-order",
+      "path": "/api/orders/alice-1",
+      "expect": {
+        "alice": {"access": "allow", "status": [200], "json": [{"pointer": "/id", "op": "equals", "value": "alice-1"}]},
+        "bob": {"access": "deny", "status": [403], "json": [{"pointer": "/id", "op": "absent"}]},
+        "admin": {"access": "allow", "status": [200], "json": [{"pointer": "/id", "op": "equals", "value": "alice-1"}]},
+        "anonymous": {"access": "deny", "status": [401]}
+      }
+    },
+    {
+      "name": "admin-users",
+      "path": "/api/admin/users",
+      "expect": {
+        "alice": {"access": "deny", "status": [403]},
+        "bob": {"access": "deny", "status": [403]},
+        "admin": {"access": "allow", "status": [200], "json": [{"pointer": "/users/0", "op": "equals", "value": "alice"}]},
+        "anonymous": {"access": "deny", "status": [401]}
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[package]
+name = "rolediff"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/dc9-dev/rolediff"
+authors = ["Łukasz Sobiecki <lukasz@sobiecki.pl>"]
+description = "Authorization regression tests for APIs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+num-bigint = "0.4"
+
+[profile.release]
+strip = true
+lto = "thin"
